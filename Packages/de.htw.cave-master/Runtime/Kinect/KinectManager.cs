@@ -1,0 +1,301 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using UnityEngine;
+using Windows.Kinect;
+using Microsoft.Kinect.Face;
+using Htw.Cave.Kinect.Utils;
+
+namespace Htw.Cave.Kinect
+{
+    public enum FaceFrameFeatureType
+    {
+        Required,
+        Full
+    }
+
+    /// <summary>
+    /// Provides the required functions to automatically retrieve data
+    /// from the <see cref="KinectSensor"/>.
+    /// </summary>
+    [AddComponentMenu("Htw.Cave/Kinect/Kinect Manager")]
+    public sealed class KinectManager : MonoBehaviour
+    {
+        public event Action onSensorOpen;
+
+        public event Action onSensorClose;
+
+        /// <summary>
+        /// Gets the connected <see cref="KinectSensor"/>.
+        /// Can be <c>null</c> if no <see cref="KinectSensor"/> is found.
+        /// </summary>
+        public KinectSensor sensor => this.m_Sensor;
+
+        /// <summary>
+        /// The floor plane vector converted to <see cref="UnityEngine.Vector4"/>.
+        /// </summary>
+        public UnityEngine.Vector4 floorClipPlane => this.m_FloorClipPlane.ToUnityVector4();
+
+        /// <summary>
+        /// The maximum number of <see cref="Body"/> instances the system can track.
+        /// </summary>
+        public int trackingCapacity => this.m_Bodies == null ? 0 : this.m_Bodies.Length;
+
+        /// <summary>
+        /// Defines the feature set of the <see cref="FaceFrameSource"/>.
+        /// </summary>
+        public FaceFrameFeatureType faceFrameFeatureType;
+
+        /// <summary>
+        /// Calculates the tilt of the <see cref="KinectSensor"/> based on
+        /// the <see cref="floorClipPlane"/>.
+        /// </summary>
+        public float tilt => Mathf.Atan(-(float)this.m_FloorClipPlane.Z / (float)this.m_FloorClipPlane.Y) * (180.0f / Mathf.PI);
+
+        private KinectSensor m_Sensor;
+
+        private Windows.Kinect.Vector4 m_FloorClipPlane;
+
+        private MultiSourceFrameReader m_MultiSourceFrameReader;
+
+        private Body[] m_Bodies;
+
+        private TimeSpan m_RelativeTime;
+
+        private FaceFrameSource[] m_FaceFrameSources;
+
+        private FaceFrameReader[] m_FaceFrameReaders;
+
+        private FaceFrameResult[] m_FaceFrameResults;
+
+        private Stopwatch m_Stopwatch;
+
+        private int m_BodyCount;
+
+        private long m_Frame;
+
+        public void Start()
+        {
+            this.m_Stopwatch = new Stopwatch();
+
+            try
+            {
+                this.m_Sensor = KinectSensor.GetDefault();
+            }
+            catch
+            {
+#if UNITY_EDITOR
+				UnityEngine.Debug.LogError("The Kinect v2 SDK was not installed properly.");
+#endif
+                this.m_Sensor = null;
+            }
+
+            enabled = this.m_Sensor != null;
+            OnEnable();
+        }
+
+        public void OnEnable()
+        {
+            if (this.m_Sensor != null)
+            {
+                InitializeBodyReaders();
+                InitializeFaceReaders();
+                OpenSensor();
+                this.onSensorOpen?.Invoke();
+            }
+        }
+
+        public void OnDisable()
+        {
+            if (this.m_Sensor != null)
+            {
+                StopBodyReaders();
+                StopFaceReaders();
+                CloseSensor();
+                this.onSensorClose?.Invoke();
+            }
+        }
+
+        public long AcquireFrames(out Body[] bodies, out FaceFrameResult[] faceFrames, out int bodyCount)
+        {
+            if (this.m_Stopwatch.ElapsedMilliseconds > KinectHelper.frameTime)
+            {
+                AcquireBodyFrames();
+                AcquireFaceFrames();
+
+                this.m_Stopwatch.Restart();
+            }
+
+            bodies = this.m_Bodies;
+            bodyCount = this.m_BodyCount;
+            faceFrames = this.m_FaceFrameResults;
+
+            return this.m_Frame;
+        }
+
+        public long ForceAcquireFrames(out Body[] bodies, out FaceFrameResult[] faceFrames, out int bodyCount)
+        {
+            AcquireBodyFrames();
+            AcquireFaceFrames();
+
+            this.m_Stopwatch.Restart();
+
+            bodies = this.m_Bodies;
+            bodyCount = this.m_BodyCount;
+            faceFrames = this.m_FaceFrameResults;
+
+            return this.m_Frame;
+        }
+
+        public bool IsSensorOpen() => this.m_Sensor.IsOpen;
+
+        private void OpenSensor()
+        {
+            if (!IsSensorOpen())
+                this.m_Sensor.Open();
+            this.m_Stopwatch.Start();
+        }
+
+        private void CloseSensor()
+        {
+            if (IsSensorOpen())
+                this.m_Sensor.Close();
+
+            this.m_Stopwatch.Stop();
+            this.m_Sensor = null;
+        }
+
+        private void InitializeBodyReaders()
+        {
+            // If more sources are needed add them with:
+            // this.m_Sensor.OpenMultiSourceFrameReader(FrameSourceTypes.Body | FrameSourceTypes.BodyIndex | FrameSourceTypes.Depth);
+
+            this.m_MultiSourceFrameReader = this.m_Sensor.OpenMultiSourceFrameReader(FrameSourceTypes.Body);
+            this.m_Bodies = new Body[this.m_Sensor.BodyFrameSource.BodyCount];
+        }
+
+        private void InitializeFaceReaders()
+        {
+            this.m_FaceFrameResults = new FaceFrameResult[this.m_Sensor.BodyFrameSource.BodyCount];
+            this.m_FaceFrameSources = new FaceFrameSource[this.m_Sensor.BodyFrameSource.BodyCount];
+            this.m_FaceFrameReaders = new FaceFrameReader[this.m_Sensor.BodyFrameSource.BodyCount];
+
+            FaceFrameFeatures faceFrameFeatures = faceFrameFeatureType == FaceFrameFeatureType.Required
+                ? RequiredFaceFrameFeatures()
+                : FullFaceFrameFeatures();
+
+            for (int i = 0; i < this.m_FaceFrameSources.Length; ++i)
+            {
+                this.m_FaceFrameSources[i] = FaceFrameSource.Create(this.m_Sensor, 0, faceFrameFeatures);
+                this.m_FaceFrameReaders[i] = this.m_FaceFrameSources[i].OpenReader();
+            }
+        }
+
+        private void AcquireBodyFrames()
+        {
+            MultiSourceFrame multiFrame = this.m_MultiSourceFrameReader.AcquireLatestFrame();
+
+            if (multiFrame == null)
+                return;
+
+            using (BodyFrame bodyFrame = multiFrame.BodyFrameReference.AcquireFrame())
+            {
+                if (bodyFrame != null && bodyFrame.RelativeTime > this.m_RelativeTime)
+                {
+                    bodyFrame.GetAndRefreshBodyData(this.m_Bodies);
+
+                    this.m_BodyCount = 0;
+
+                    // Count tracked bodies and move them to the
+                    // start of the array.
+                    for (int i = 0, j = this.m_Bodies.Length - 1; i < this.m_Bodies.Length && i < j; ++i)
+                    {
+                        if (this.m_Bodies[i] == null || !this.m_Bodies[i].GetIsTrackedFast())
+                        {
+                            var temp = this.m_Bodies[i];
+                            this.m_Bodies[i--] = this.m_Bodies[j];
+                            this.m_Bodies[j--] = temp;
+                            continue;
+                        }
+
+                        ++this.m_BodyCount;
+                    }
+
+                    this.m_RelativeTime = bodyFrame.RelativeTime;
+                    this.m_FloorClipPlane = bodyFrame.FloorClipPlane;
+                    ++this.m_Frame;
+                }
+            }
+
+            // In the documentation the MultiSourceFrame implements IDisposable
+            // but this is not true for the provided scripts. Instead the finalizer
+            // needs to be called to cleanup the resources.
+            multiFrame = null;
+        }
+
+        private void AcquireFaceFrames()
+        {
+            for (int i = 0; i < this.m_BodyCount; ++i)
+            {
+                this.m_FaceFrameSources[i].TrackingId = this.m_Bodies[i].GetTrackingIdFast();
+
+                using (FaceFrame faceFrame = this.m_FaceFrameReaders[i].AcquireLatestFrame())
+                {
+                    if (faceFrame == null)
+                        continue;
+
+                    this.m_FaceFrameResults[i] = faceFrame.FaceFrameResult;
+                }
+            }
+        }
+
+        private void StopBodyReaders()
+        {
+            if (this.m_MultiSourceFrameReader != null)
+            {
+                this.m_MultiSourceFrameReader.Dispose();
+                this.m_MultiSourceFrameReader = null;
+            }
+        }
+
+        private void StopFaceReaders()
+        {
+            for (int i = 0; i < this.m_FaceFrameSources.Length; ++i)
+            {
+                if (this.m_FaceFrameReaders[i] != null)
+                {
+                    this.m_FaceFrameReaders[i].Dispose();
+                    this.m_FaceFrameReaders[i] = null;
+                }
+
+                if (this.m_FaceFrameSources[i] != null)
+                    this.m_FaceFrameSources[i] = null;
+            }
+        }
+
+        private static FaceFrameFeatures RequiredFaceFrameFeatures() =>
+            FaceFrameFeatures.BoundingBoxInColorSpace |
+            FaceFrameFeatures.PointsInColorSpace |
+            FaceFrameFeatures.BoundingBoxInInfraredSpace |
+            FaceFrameFeatures.PointsInInfraredSpace |
+            FaceFrameFeatures.RotationOrientation |
+            FaceFrameFeatures.Glasses |
+            FaceFrameFeatures.LookingAway;
+
+        private static FaceFrameFeatures FullFaceFrameFeatures() =>
+            FaceFrameFeatures.BoundingBoxInColorSpace |
+            FaceFrameFeatures.PointsInColorSpace |
+            FaceFrameFeatures.BoundingBoxInInfraredSpace |
+            FaceFrameFeatures.PointsInInfraredSpace |
+            FaceFrameFeatures.RotationOrientation |
+            FaceFrameFeatures.FaceEngagement |
+            FaceFrameFeatures.Glasses |
+            FaceFrameFeatures.Happy |
+            FaceFrameFeatures.LeftEyeClosed |
+            FaceFrameFeatures.RightEyeClosed |
+            FaceFrameFeatures.LookingAway |
+            FaceFrameFeatures.MouthMoved |
+            FaceFrameFeatures.MouthOpen;
+    }
+}
