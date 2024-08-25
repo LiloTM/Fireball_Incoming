@@ -8,7 +8,7 @@ public class EmenyManager : MonoBehaviour
     [SerializeField] private List<GameObject> spawnPoints = new List<GameObject>();
     private List<bool> isEnemyInSpawn = new List<bool>();
 
-    private List<GameObject> enemies = new List<GameObject>();
+    public  List<GameObject> enemies = new List<GameObject>();
     void Start()
     {   
         foreach(GameObject s in spawnPoints){ isEnemyInSpawn.Add(false);}
@@ -42,6 +42,7 @@ public class EmenyManager : MonoBehaviour
         // spawns new enemy
         Vector3 pos = spawnPoints[randomIndex].transform.position;
         GameObject b = Instantiate(enemyPrefab, pos, Quaternion.LookRotation(new Vector3(-pos.x, 0, -pos.z)));
+        b.GetComponent<Enemy>().getEnemyManager(this);
         enemies.Add(b);
     }
 }

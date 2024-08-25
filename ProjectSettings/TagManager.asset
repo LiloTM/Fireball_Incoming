@@ -8,6 +8,7 @@ TagManager:
   - CubeSpawner
   - HandRight
   - HandLeft
+  - Projectile
   layers:
   - Default
   - TransparentFX
