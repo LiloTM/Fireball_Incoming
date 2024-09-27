@@ -13,6 +13,11 @@ enum Shape {
 
 public class GestureRecognition : MonoBehaviour
 {
+    [SerializeField] private GameObject projectilePrefab;
+    [SerializeField] private GameObject fire;
+    [SerializeField] private GameObject water;
+    [SerializeField] private GameObject lightning;
+
     [SerializeField] private GameObject handLeft;
     [SerializeField] private GameObject handRight;
 
@@ -28,6 +33,9 @@ public class GestureRecognition : MonoBehaviour
     {
         handLeft = GameObject.FindGameObjectWithTag("HandLeft");
         handRight = GameObject.FindGameObjectWithTag("HandRight");
+        fire = handRight.transform.GetChild(3).gameObject;
+        water = handRight.transform.GetChild(3).gameObject;
+        lightning = handRight.transform.GetChild(3).gameObject;
     }
     private void Update()
     {
@@ -69,13 +77,17 @@ public class GestureRecognition : MonoBehaviour
             if (Vector3.Distance(posLeft[i], posLeft[i + 1]) >= handDistanceThreshold) leftMoved = true;
             if (Vector3.Distance(posRight[i], posRight[i + 1]) >= handDistanceThreshold) rightMoved = true;
         }
-        if (rightMoved && leftMoved) {
+        if (rightMoved && leftMoved)
+        {
             if (IsTriangleShape()) shape = Shape.Triangle;
         }
-        else if(IsCircleShape()) shape = Shape.Circle;
-        else if(IsWaveShape()) shape = Shape.Wave;
-        else Debug.Log("WTF ");
-        
+        else if (IsCircleShape()) shape = Shape.Circle;
+        else if (IsWaveShape()) shape = Shape.Wave;
+        else {
+            shape = Shape.Empty;
+            Debug.Log("WTF "); 
+        }
+        CastSpell();
     }
     private bool IsCircleShape()
     {
@@ -112,7 +124,6 @@ public class GestureRecognition : MonoBehaviour
             check if distance from the middle point is the same for all (-> RADIUS with offset)
          */
     }
-
     private bool IsWaveShape()
     {
         Vector3 start = posRight[0];
@@ -159,4 +170,43 @@ public class GestureRecognition : MonoBehaviour
     }
     //permanently running, minumum sizes for shapes 
     //mit beiden hands gleichzeitig casten possible
+
+    private void CastSpell()
+    {
+        //TODO: activate proper Shader
+        Debug.Log("Aiming...");
+        switch (shape)
+        {
+            case Shape.Circle:
+                fire.SetActive(true);
+                break;
+            case Shape.Wave:
+                water.SetActive(true);
+                break;
+            case Shape.Triangle:
+                lightning.SetActive(true);
+                break;
+            case Shape.Empty:
+                break;
+        }
+        InvokeRepeating("IncreaseShader", 0.2f, 0.07f);
+        Invoke("FinishSpell", 2);
+    }
+    private void IncreaseShader()
+    {
+        //TODO: increase the shader size
+    }
+    private void FinishSpell()
+    {
+        Debug.Log("Pew!");
+        CancelInvoke(methodName: "IncreaseShader");
+        Vector3 direction = handRight.transform.position - handLeft.transform.position;
+
+        GameObject p = Instantiate(projectilePrefab, handRight.transform.position, Quaternion.identity);
+        Rigidbody rb = p.GetComponent<Rigidbody>();
+        rb.velocity += direction.normalized * Time.deltaTime * 300;
+
+        shape = Shape.Empty;
+        //reset Shader Size
+    }
 }

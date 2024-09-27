@@ -5,7 +5,7 @@ using UnityEngine;
 public class Enemy : MonoBehaviour
 {
     [SerializeField] private GameObject projectilePrefab;
-    [SerializeField] private int projectileSpeed = 100;
+    [SerializeField] private int projectileSpeed = 300;
     private GameObject playerHead;
     private EmenyManager eM;
 
@@ -24,7 +24,7 @@ public class Enemy : MonoBehaviour
 
         GameObject p = Instantiate(projectilePrefab, transform.position, Quaternion.identity);
         Rigidbody rb = p.GetComponent<Rigidbody>();
-        rb.velocity += (playerHead.transform.position - p.transform.position) * Time.deltaTime * projectileSpeed;
+        rb.velocity += (playerHead.transform.position - p.transform.position).normalized * Time.deltaTime * projectileSpeed;
     }
     private void OnTriggerEnter(Collider other)
     {
