@@ -174,6 +174,7 @@ public class GestureRecognition : MonoBehaviour
     private void CastSpell()
     {
         //TODO: activate proper Shader
+
         Debug.Log("Aiming...");
         switch (shape)
         {
@@ -207,6 +208,7 @@ public class GestureRecognition : MonoBehaviour
         rb.velocity += direction.normalized * Time.deltaTime * 300;
 
         shape = Shape.Empty;
-        //reset Shader Size
+        //TODO: reset Shader Size
+        //TODO: stop particle properly
     }
 }
