@@ -48,6 +48,11 @@ public class GestureRecognition : MonoBehaviour
         }
     }
 
+    private void IsInvokingTrue()
+    {
+        isInvoking = false;
+    }
+
     private void PrintPositions()
     {
         posLeft.Add(handLeft.transform.position);
@@ -55,7 +60,7 @@ public class GestureRecognition : MonoBehaviour
         if (posLeft.Count >= 32 || posRight.Count >= 32) {
             symbolActive = false;
             CancelInvoke(methodName: "PrintPositions");
-            isInvoking = false;
+            Invoke("IsInvokingTrue", 3);
             CheckShapes();
             posLeft = new List<Vector3>();
             posRight = new List<Vector3>();

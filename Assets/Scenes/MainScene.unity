@@ -174,6 +174,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4325836872101381419, guid: 81f518ef6a1176543901492bab143ecc, type: 3}
+      propertyPath: m_TagString
+      value: Untagged
+      objectReference: {fileID: 0}
     - target: {fileID: 4452080612223843590, guid: 81f518ef6a1176543901492bab143ecc, type: 3}
       propertyPath: m_Name
       value: TestActor
@@ -5813,8 +5817,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 150, y: 100}
-  m_SizeDelta: {x: 400, y: 20}
+  m_AnchoredPosition: {x: 80, y: 80}
+  m_SizeDelta: {x: 400, y: 39}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1542196255
 MonoBehaviour:
@@ -5863,7 +5867,7 @@ MonoBehaviour:
   m_MinValue: 0
   m_MaxValue: 1
   m_WholeNumbers: 0
-  m_Value: 0.55
+  m_Value: 1
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
