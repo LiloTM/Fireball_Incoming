@@ -28,17 +28,26 @@ public class GestureRecognition : MonoBehaviour
     private float handDistanceThreshold = 0.2f;
     private bool symbolActive = false;
     private bool isInvoking = false;
+    private bool gameStart = false;
 
     private void Start()
+    {
+        StartMenu.Instance.BeginGame.AddListener(SetUp);
+    }
+
+    private void SetUp()
     {
         handLeft = GameObject.FindGameObjectWithTag("HandLeft");
         handRight = GameObject.FindGameObjectWithTag("HandRight");
         fire = handRight.transform.GetChild(3).gameObject;
         water = handRight.transform.GetChild(3).gameObject;
         lightning = handRight.transform.GetChild(3).gameObject;
+        gameStart = true;
     }
+
     private void Update()
     {
+        if (!gameStart) return;
         CheckHandDistance();
         if (symbolActive && !isInvoking) { 
             InvokeRepeating("PrintPositions", 0.2f, 0.07f);

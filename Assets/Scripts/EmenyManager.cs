@@ -10,7 +10,12 @@ public class EmenyManager : MonoBehaviour
 
     public  List<GameObject> enemies = new List<GameObject>();
     void Start()
-    {   
+    {
+        StartMenu.Instance.BeginGame.AddListener(SetUp);
+    }
+
+    private void SetUp()
+    {
         foreach(GameObject s in spawnPoints){ isEnemyInSpawn.Add(false);}
         InvokeRepeating("SpawnEnemy", 3f, 4f);
     }

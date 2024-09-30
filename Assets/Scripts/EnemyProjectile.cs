@@ -11,6 +11,7 @@ public class EnemyProjectile : MonoBehaviour
     {
         player = GameObject.Find("Player").GetComponent<Player>();
     }
+
     void Update()
     {
         timeAlive += Time.deltaTime;
