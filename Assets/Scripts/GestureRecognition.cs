@@ -13,7 +13,9 @@ enum Shape {
 
 public class GestureRecognition : MonoBehaviour
 {
-    [SerializeField] private GameObject projectilePrefab;
+    [SerializeField] private GameObject f_projectilePrefab;
+    [SerializeField] private GameObject w_projectilePrefab;
+    [SerializeField] private GameObject l_projectilePrefab;
     [SerializeField] private GameObject fire;
     [SerializeField] private GameObject water;
     [SerializeField] private GameObject lightning;
@@ -41,14 +43,17 @@ public class GestureRecognition : MonoBehaviour
         handLeft = GameObject.FindGameObjectWithTag("HandLeft");
         handRight = GameObject.FindGameObjectWithTag("HandRight");
         fire = handRight.transform.GetChild(3).gameObject;
-        water = handRight.transform.GetChild(3).gameObject;
-        lightning = handRight.transform.GetChild(3).gameObject;
+        water = handRight.transform.GetChild(5).gameObject;
+        lightning = handRight.transform.GetChild(4).gameObject;
         gameStart = true;
     }
     private void ShutDown()
     {
         handLeft = null;
         handRight = null;
+        fire.SetActive(false);
+        water.SetActive(false);
+        lightning.SetActive(false);
         fire = null;
         water = null;
         lightning = null;
@@ -198,8 +203,7 @@ public class GestureRecognition : MonoBehaviour
 
     private void CastSpell()
     {
-        //TODO: activate proper Shader
-
+        //switch particle effect on the hands
         Debug.Log("Aiming...");
         switch (shape)
         {
@@ -213,8 +217,12 @@ public class GestureRecognition : MonoBehaviour
                 lightning.SetActive(true);
                 break;
             case Shape.Empty:
+                fire.SetActive(false);
+                water.SetActive(false);
+                lightning.SetActive(false);
                 break;
         }
+
         InvokeRepeating("IncreaseShader", 0.2f, 0.07f);
         Invoke("FinishSpell", 2);
     }
@@ -228,11 +236,27 @@ public class GestureRecognition : MonoBehaviour
         CancelInvoke(methodName: "IncreaseShader");
         Vector3 direction = handRight.transform.position - handLeft.transform.position;
 
-        GameObject p = Instantiate(projectilePrefab, handRight.transform.position, Quaternion.identity);
+        GameObject p = new GameObject();
+        switch (shape)
+        {
+            case Shape.Circle:
+                p = Instantiate(f_projectilePrefab, handRight.transform.position, Quaternion.identity);
+                break;
+            case Shape.Wave:
+                p = Instantiate(w_projectilePrefab, handRight.transform.position, Quaternion.identity);
+                break;
+            case Shape.Triangle:
+                p = Instantiate(l_projectilePrefab, handRight.transform.position, Quaternion.identity);
+                break;
+        }
+        
         Rigidbody rb = p.GetComponent<Rigidbody>();
         rb.velocity += direction.normalized * Time.deltaTime * 300;
 
         shape = Shape.Empty;
+        fire.SetActive(false);
+        water.SetActive(false);
+        lightning.SetActive(false);
         //TODO: reset Shader Size
         //TODO: stop particle properly
     }

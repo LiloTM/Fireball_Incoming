@@ -1,3 +1,4 @@
+//made by Laura Unverzagt
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -31,6 +32,7 @@ public class Enemy : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         eM.enemies.Remove(this.gameObject);
+        StartMenu.Instance.IncreaseScore();
         if(other.gameObject.tag == "Projectile") Destroy(this.gameObject);
     }
 }
