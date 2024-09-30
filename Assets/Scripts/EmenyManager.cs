@@ -6,18 +6,22 @@ public class EmenyManager : MonoBehaviour
 {
     [SerializeField] private GameObject enemyPrefab;
     [SerializeField] private List<GameObject> spawnPoints = new List<GameObject>();
-    private List<bool> isEnemyInSpawn = new List<bool>();
-
     public  List<GameObject> enemies = new List<GameObject>();
     void Start()
     {
         StartMenu.Instance.BeginGame.AddListener(SetUp);
+        StartMenu.Instance.EndGame.AddListener(ShutDown);
     }
 
     private void SetUp()
     {
-        foreach(GameObject s in spawnPoints){ isEnemyInSpawn.Add(false);}
         InvokeRepeating("SpawnEnemy", 3f, 4f);
+    }
+    private void ShutDown()
+    {
+        foreach (GameObject en in enemies) { Destroy(en); }
+        enemies = new List<GameObject>();
+        CancelInvoke("SpawnEnemy");
     }
 
     private void SpawnEnemy()

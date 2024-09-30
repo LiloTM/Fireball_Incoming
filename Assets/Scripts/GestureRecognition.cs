@@ -33,6 +33,7 @@ public class GestureRecognition : MonoBehaviour
     private void Start()
     {
         StartMenu.Instance.BeginGame.AddListener(SetUp);
+        StartMenu.Instance.EndGame.AddListener(ShutDown);
     }
 
     private void SetUp()
@@ -43,6 +44,16 @@ public class GestureRecognition : MonoBehaviour
         water = handRight.transform.GetChild(3).gameObject;
         lightning = handRight.transform.GetChild(3).gameObject;
         gameStart = true;
+    }
+    private void ShutDown()
+    {
+        handLeft = null;
+        handRight = null;
+        fire = null;
+        water = null;
+        lightning = null;
+        gameStart = false;
+        CancelInvoke();
     }
 
     private void Update()
