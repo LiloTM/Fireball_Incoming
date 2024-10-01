@@ -136,7 +136,7 @@ public class GestureRecognition : MonoBehaviour
                 dst = Vector3.Distance(startPos, pos);
             }
         }
-        //Debug.Log(startPos + " " + vec);
+
         Vector3 midPos = Vector3.Lerp(startPos, vec, 0.5f);
         Debug.DrawRay(startPos, vec, Color.red, 1.0f);
 
@@ -204,9 +204,6 @@ public class GestureRecognition : MonoBehaviour
             if they do -> check if y value (value downward) changes
          */
     }
-    //permanently running, minumum sizes for shapes 
-    //mit beiden hands gleichzeitig casten possible
-
     private void CastSpell()
     {
         //switch particle effect on the hands
@@ -229,12 +226,7 @@ public class GestureRecognition : MonoBehaviour
                 break;
         }
 
-        InvokeRepeating("IncreaseShader", 0.2f, 0.07f);
         Invoke("FinishSpell", 2);
-    }
-    private void IncreaseShader()
-    {
-        //TODO: increase the shader size
     }
     private void FinishSpell()
     {
@@ -267,6 +259,5 @@ public class GestureRecognition : MonoBehaviour
         fire.SetActive(false);
         water.SetActive(false);
         lightning.SetActive(false);
-        //TODO: reset Shader Size
     }
 }
