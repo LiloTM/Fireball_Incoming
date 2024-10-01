@@ -3,14 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// Simple button trigger that begins the game (utilises the GameManager Script)
 public class ButtonPress : MonoBehaviour
 {
     private void OnTriggerEnter(Collider other)
     {
-        if (StartMenu.Instance.BeginGame != null && !StartMenu.Instance.playing)
+        if (GameManager.Instance.BeginGame != null && !GameManager.Instance.playing)
         {
-            StartMenu.Instance.BeginGame.Invoke();
-            StartMenu.Instance.playing = true;
+            GameManager.Instance.BeginGame.Invoke();
+            GameManager.Instance.playing = true;
         }
     }
 }

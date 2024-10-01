@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// Script regulating the enemies and their spawn rate, as well as spawn point. 
+// Keeps a list of all enemies, that empties and deletes such upon conclusion of the game
 public class EmenyManager : MonoBehaviour
 {
     [SerializeField] private GameObject enemyPrefab;
@@ -10,13 +12,13 @@ public class EmenyManager : MonoBehaviour
     public  List<GameObject> enemies = new List<GameObject>();
     void Start()
     {
-        StartMenu.Instance.BeginGame.AddListener(SetUp);
-        StartMenu.Instance.EndGame.AddListener(ShutDown);
+        GameManager.Instance.BeginGame.AddListener(SetUp);
+        GameManager.Instance.EndGame.AddListener(ShutDown);
     }
 
     private void SetUp()
     {
-        InvokeRepeating("SpawnEnemy", 3f, 4f);
+        InvokeRepeating("SpawnEnemy", 3f, 10f);
     }
     private void ShutDown()
     {

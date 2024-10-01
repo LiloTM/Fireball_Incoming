@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// Ensures the animations of the enemy and destruction via player projectile
+// Lets the enemy shoot enemy projectiles in the direction of the players head
 public class Enemy : MonoBehaviour
 {
     [SerializeField] private GameObject projectilePrefab;
@@ -32,7 +34,7 @@ public class Enemy : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         eM.enemies.Remove(this.gameObject);
-        StartMenu.Instance.IncreaseScore();
+        GameManager.Instance.IncreaseScore();
         if(other.gameObject.tag == "Projectile") Destroy(this.gameObject);
     }
 }

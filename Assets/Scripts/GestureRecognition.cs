@@ -10,7 +10,13 @@ enum Shape {
     Triangle,
     Empty
 }
-
+// This script is the core of the game
+// Upon finding the player, the script will check within Update whether his hands are close enough together
+// Once they are, it will log all hand positions in "PrintPositions"
+// Afterwards, in CheckShapes, the positions will be evaluated (IsCircle, IsTriangle, IsWave)
+// Dependant on the outcome, within CastSpell, the proper Particle System will be chosen for the according shape, and the aiming phase begins
+// The FinishSpell method will be called, that calculates the direction by creating a vector between both hands
+// This will finish the loop. A small cooldown for the spell ensues, before the player can cast again
 public class GestureRecognition : MonoBehaviour
 {
     [SerializeField] private GameObject f_projectilePrefab;
@@ -34,8 +40,8 @@ public class GestureRecognition : MonoBehaviour
 
     private void Start()
     {
-        StartMenu.Instance.BeginGame.AddListener(SetUp);
-        StartMenu.Instance.EndGame.AddListener(ShutDown);
+        GameManager.Instance.BeginGame.AddListener(SetUp);
+        GameManager.Instance.EndGame.AddListener(ShutDown);
     }
 
     private void SetUp()
@@ -258,6 +264,5 @@ public class GestureRecognition : MonoBehaviour
         water.SetActive(false);
         lightning.SetActive(false);
         //TODO: reset Shader Size
-        //TODO: stop particle properly
     }
 }
