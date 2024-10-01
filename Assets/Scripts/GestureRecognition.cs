@@ -243,21 +243,25 @@ public class GestureRecognition : MonoBehaviour
         Vector3 direction = handRight.transform.position - handLeft.transform.position;
 
         GameObject p = new GameObject();
+        Rigidbody rb = new Rigidbody();
         switch (shape)
         {
             case Shape.Circle:
                 p = Instantiate(f_projectilePrefab, handRight.transform.position, Quaternion.identity);
+                rb = p.GetComponent<Rigidbody>();
+                rb.velocity += direction.normalized * Time.deltaTime * 100;
                 break;
             case Shape.Wave:
                 p = Instantiate(w_projectilePrefab, handRight.transform.position, Quaternion.identity);
+                rb = p.GetComponent<Rigidbody>();
+                rb.velocity += direction.normalized * Time.deltaTime * 100;
                 break;
             case Shape.Triangle:
                 p = Instantiate(l_projectilePrefab, handRight.transform.position, Quaternion.identity);
+                rb = p.GetComponent<Rigidbody>();
+                rb.velocity += direction.normalized * Time.deltaTime * 100;
                 break;
         }
-        
-        Rigidbody rb = p.GetComponent<Rigidbody>();
-        rb.velocity += direction.normalized * Time.deltaTime * 300;
 
         shape = Shape.Empty;
         fire.SetActive(false);

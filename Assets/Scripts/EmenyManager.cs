@@ -18,7 +18,7 @@ public class EmenyManager : MonoBehaviour
 
     private void SetUp()
     {
-        InvokeRepeating("SpawnEnemy", 3f, 10f);
+        InvokeRepeating("SpawnEnemy", 3f, 20);
     }
     private void ShutDown()
     {

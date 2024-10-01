@@ -8,7 +8,7 @@ using UnityEngine;
 public class Enemy : MonoBehaviour
 {
     [SerializeField] private GameObject projectilePrefab;
-    [SerializeField] private int projectileSpeed = 300;
+    [SerializeField] private int projectileSpeed = 100;
     private GameObject playerHead;
     private EmenyManager eM;
     private Animator anim;
@@ -17,7 +17,7 @@ public class Enemy : MonoBehaviour
     {
         playerHead = GameObject.FindGameObjectWithTag("ActorHead");
         anim = transform.GetChild(0).GetComponent<Animator>();
-        InvokeRepeating("Shoot", 3f, 3f);    
+        InvokeRepeating("Shoot", 3f, 6f);    
     }
     public void getEnemyManager(EmenyManager M)
     {
