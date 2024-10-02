@@ -179,7 +179,7 @@ public class GestureRecognition : MonoBehaviour
         else return false;
         /*
          * WAVE
-            take first and (last?) point 
+            take first point 
             see if they overlap any path between points
          */
     }
