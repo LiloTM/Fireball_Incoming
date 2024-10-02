@@ -7,7 +7,9 @@ using UnityEngine;
 // Keeps a list of all enemies, that empties and deletes such upon conclusion of the game
 public class EmenyManager : MonoBehaviour
 {
-    [SerializeField] private GameObject enemyPrefab;
+    [SerializeField] private GameObject f_enemyPrefab;
+    [SerializeField] private GameObject l_enemyPrefab;
+    [SerializeField] private GameObject w_enemyPrefab;
     [SerializeField] private List<GameObject> spawnPoints = new List<GameObject>();
     public  List<GameObject> enemies = new List<GameObject>();
     void Start()
@@ -50,10 +52,27 @@ public class EmenyManager : MonoBehaviour
                 }
             }     
         }
-        
+
         // spawns new enemy
+        randomIndex = Random.Range(0, 3);
+        GameObject enm = new GameObject();
+        switch (randomIndex)
+        {
+            case 0:
+                enm = f_enemyPrefab;
+                break;
+            case 1:
+                enm = l_enemyPrefab;
+                break;
+            case 2:
+                enm = w_enemyPrefab;
+                break;
+            default:
+                enm = f_enemyPrefab;
+                break;
+        }
         Vector3 pos = spawnPoints[randomIndex].transform.position;
-        GameObject b = Instantiate(enemyPrefab, pos, Quaternion.LookRotation(new Vector3(-pos.x, 0, -pos.z)));
+        GameObject b = Instantiate(enm, pos, Quaternion.LookRotation(new Vector3(-pos.x, 0, -pos.z)));
         b.GetComponent<Enemy>().getEnemyManager(this);
         enemies.Add(b);
     }

@@ -9,6 +9,9 @@ TagManager:
   - HandRight
   - HandLeft
   - Projectile
+  - Fire
+  - Lightning
+  - Water
   layers:
   - Default
   - TransparentFX

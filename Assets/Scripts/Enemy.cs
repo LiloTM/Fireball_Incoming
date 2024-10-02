@@ -33,8 +33,10 @@ public class Enemy : MonoBehaviour
     }
     private void OnTriggerEnter(Collider other)
     {
-        eM.enemies.Remove(this.gameObject);
-        GameManager.Instance.IncreaseScore();
-        if(other.gameObject.tag == "Projectile") Destroy(this.gameObject);
+        if (other.gameObject.tag == this.gameObject.tag) {
+            eM.enemies.Remove(this.gameObject);
+            GameManager.Instance.IncreaseScore();
+            Destroy(this.gameObject);
+        } 
     }
 }
