@@ -253,11 +253,6 @@ public class GestureRecognition : MonoBehaviour
                 rb = p.GetComponent<Rigidbody>();
                 rb.velocity += direction.normalized * Time.deltaTime * 100;
                 break;
-            case Shape.Empty:
-                p = Instantiate(f_projectilePrefab, handRight.transform.position, Quaternion.identity);
-                rb = p.GetComponent<Rigidbody>();
-                rb.velocity += direction.normalized * Time.deltaTime * 100;
-                break;
         }
 
         shape = Shape.Empty;
